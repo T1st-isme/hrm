@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  email          String   @unique
+  password       String
+  profilePicture String? @default("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png")
+  contactNumber  String?
+  fullName       String
+  dateOfBirth    DateTime
+  address        String
+  employmentStartDate DateTime @default(now())
+  jobTitle       String
+  department     Department? @relation(fields: [departmentId], references: [id])
+  departmentId   String? @db.ObjectId
+  salary         Float?
+  leaveRequests  LeaveRequest[]
+  payrolls       Payroll[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model LeaveRequest {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  employee       Employee @relation(fields: [employeeId], references: [id])
+  employeeId     String @db.ObjectId
+  startDate      DateTime
+  endDate        DateTime
+  status         LeaveStatus @default(PENDING)
+  reason         String?
+}
+
+model Department {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  image          String?
+  description    String?
+  employees      Employee[]
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Payroll {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  employee       Employee @relation(fields: [employeeId], references: [id])
+  employeeId     String   @db.ObjectId
+  baseSalary     Float
+  bonuses        Bonus[]
+  penalties      Penalty[]
+  finalSalary    Float
+  processedDate  DateTime
+}
+
+model Bonus {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  payroll        Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId      String   @db.ObjectId
+  amount         Float
+  reason         String
+}
+
+model Penalty {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  payroll        Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId      String   @db.ObjectId
+  amount         Float
+  reason         String
+}
