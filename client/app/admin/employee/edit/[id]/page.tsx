@@ -2,7 +2,6 @@
 
 // import { useEffect, useState } from "react";
 // import { Calendar } from "lucide-react";
-
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // import { Button } from "@/components/ui/button";
 // import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -32,54 +31,66 @@
 // import { useForm } from "react-hook-form";
 // import * as z from "zod";
 // import { useDepartment } from "@/hooks/useDepartment";
+// import { useEmployee } from "@/hooks/useEmployee";
+// import MainLayout from "@/app/components/MainLayout";
 
 // const formSchema = z.object({
 //     firstName: z.string({ required_error: "First name is required" }),
 //     lastName: z.string({ required_error: "Last name is required" }),
 //     profilePicture: z.string({ required_error: "Profile picture is required" }),
-//     dateOfBirth: z.date(),
+//     dateOfBirth: z.string({ required_error: "Date of birth is required" }),
 //     email: z.string({ required_error: "Invalid email address" }).email(),
 //     password: z.string({ required_error: "Password is required" }),
 //     address: z.string({ required_error: "Address is required" }),
 //     contactNumber: z.string({ required_error: "Phone number is required" }),
 //     jobTitle: z.string({ required_error: "Job title is required" }),
-//     department: z.string({ required_error: "Department is required" }),
+//     departmentId: z.string({ required_error: "Department is required" }),
 // });
 
-// export default function AddEmployeeForm({
+// export default function EditEmployeeForm({
 //     closeDialog,
+//     params,
 //     onSubmit,
 // }: {
 //     closeDialog: () => void;
-//     onSubmit: (employee: z.infer<typeof formSchema>) => void;
+//     params: { id: string };
+//     onSubmit: (values: z.infer<typeof formSchema>) => void;
 // }) {
-//     const [avatar, setAvatar] = useState<string | null>(null);
-//     //fetch department
+//     const id = params.id;
+//     const { loading, error, getEmployeeById, employee } = useEmployee();
 //     const { departments, fetchDepartments } = useDepartment();
+//     const [avatar, setAvatar] = useState<string | null>(null);
 
 //     useEffect(() => {
 //         fetchDepartments();
-//     }, [fetchDepartments]);
+//         if (id) {
+//             getEmployeeById(id);
+//         }
+//     }, [id, fetchDepartments, getEmployeeById]);
 
 //     const form = useForm<z.infer<typeof formSchema>>({
 //         resolver: zodResolver(formSchema),
 //         defaultValues: {
-//             firstName: "",
-//             lastName: "",
-//             profilePicture: "",
-//             dateOfBirth: undefined,
-//             email: "",
-//             password: "",
-//             address: "",
-//             contactNumber: "",
-//             jobTitle: "",
-//             department: "",
+//             firstName: employee?.firstName,
+//             lastName: employee?.lastName,
+//             profilePicture: employee?.profilePicture,
+//             dateOfBirth: employee?.dateOfBirth,
+//             email: employee?.email,
+//             password: employee?.password,
+//             address: employee?.address,
+//             contactNumber: employee?.contactNumber,
+//             jobTitle: employee?.jobTitle,
+//             departmentId: employee?.departmentId,
 //         },
 //     });
+
+//     // const { reset } = form;
+
 //     const handleSubmit = (values: z.infer<typeof formSchema>) => {
 //         onSubmit(values);
 //         closeDialog();
 //     };
+
 //     const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
 //         const file = event.target.files?.[0];
 //         if (file) {
@@ -91,10 +102,23 @@
 //         }
 //     };
 
+//     if (loading)
+//         return (
+//             <MainLayout title="">
+//                 <div>Loading...</div>
+//             </MainLayout>
+//         );
+//     if (error)
+//         return (
+//             <MainLayout title="">
+//                 <div>Error: {error}</div>
+//             </MainLayout>
+//         );
+
 //     return (
 //         <div className="container mx-auto p-6 bg-gray-100">
 //             <div className="bg-white p-6 rounded-lg shadow">
-//                 <h2 className="text-2xl font-bold mb-6">Add Employee</h2>
+//                 <h2 className="text-2xl font-bold mb-6">Edit Employee</h2>
 //                 <Form {...form}>
 //                     <form
 //                         onSubmit={form.handleSubmit(handleSubmit)}
@@ -112,7 +136,11 @@
 //                                             "/placeholder.svg?height=96&width=96"
 //                                         }
 //                                     />
-//                                     <AvatarFallback>Avatar</AvatarFallback>
+//                                     <AvatarFallback>
+//                                         {form.watch("firstName")
+//                                             ? form.watch("firstName").charAt(0)
+//                                             : "A"}
+//                                     </AvatarFallback>
 //                                 </Avatar>
 //                                 <div>
 //                                     <Button
@@ -312,7 +340,7 @@
 //                                     )}
 //                                 />
 //                                 <FormField
-//                                     name="department"
+//                                     name="departmentId"
 //                                     render={({ field }) => (
 //                                         <FormItem>
 //                                             <FormLabel>Department</FormLabel>

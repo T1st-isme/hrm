@@ -1,94 +1,107 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
+import { useEmployee } from "@/hooks/useEmployee";
 import { Input } from "@/components/ui/input";
-import MainLayout from "../../components/MainLayout";
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Table,
-    TableBody,
-    TableCell,
-    TableHead,
     TableHeader,
     TableRow,
+    TableHead,
+    TableBody,
+    TableCell,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
     DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import MainLayout from "@/app/components/MainLayout";
+import AddEmployeeModal from "@/app/components/Modal/AddEmployeeModal";
 import { useRouter } from "next/navigation";
-
-interface Employee {
-    id: string;
-    fullName: string;
-    email: string;
-    departmentId: string;
-    jobTitle: string;
-    profilePicture: string;
-}
+import EditEmployeeModal from "@/app/components/Modal/EditEmployeeModel";
 
 export default function EmployeePage() {
-    const [emp, setEmp] = useState<Employee[] | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const {
+        employees,
+        loading,
+        error,
+        fetchEmployees,
+        isDialogOpen,
+        openDialog,
+        closeDialog,
+    } = useEmployee();
     const [searchTerm, setSearchTerm] = useState<string>("");
+    const [editEmployeeId, setEditEmployeeId] = useState<string>("");
+    const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
     const router = useRouter();
 
     useEffect(() => {
-        const fetchEmp = async () => {
-            try {
-                const res = await fetch("http://localhost:8080/employee");
+        fetchEmployees();
+    }, [fetchEmployees]);
 
-                if (!res.ok) {
-                    throw new Error("Failed to fetch employees");
-                }
-
-                const data: Employee[] = await res.json();
-                setEmp(data);
-            } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("An unexpected error occurred");
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchEmp();
-    }, []);
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
-    if (!emp || emp.length === 0) return <div>No employees found.</div>;
-
-    const filteredEmployees = emp.filter(
+    const filteredEmployees = employees.filter(
         (employee) =>
             employee.fullName
-                .toLowerCase()
+                ?.toLowerCase()
                 .includes(searchTerm.toLowerCase()) ||
-            employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            employee.departmentId
-                .toLowerCase()
+            employee.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            employee.department?.name
+                ?.toLowerCase()
                 .includes(searchTerm.toLowerCase()) ||
-            employee.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
+            employee.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleDelete = (id: string) => {
-        setEmp(emp.filter((employee) => employee.id !== id));
+        // Ideally, you'll call an API to delete, then update state.
+        // But for now, we can directly filter the employee list.
+        // setEmployees((prev) => prev.filter((employee) => employee.id !== id));
+        console.log("delete", id);
     };
 
-    const handleEdit = (id: string) => {
-        // Implement edit functionality here
-        console.log(`Edit employee with id: ${id}`);
+    const handleEdit = useCallback(
+        (id: string, event: React.MouseEvent) => {
+            event.stopPropagation();
+            setEditEmployeeId(id);
+            openDialog();
+        },
+        [openDialog]
+    );
+
+    const handleAdd = () => {
+        setIsAddModalOpen(true);
     };
+
+    const handleCloseEditModal = useCallback(() => {
+        closeDialog();
+        // Refresh the employees list after closing the edit modal
+        fetchEmployees();
+    }, [closeDialog, fetchEmployees]);
+
+    if (loading)
+        return (
+            <MainLayout title="">
+                <div>Loading...</div>
+            </MainLayout>
+        );
+    if (error)
+        return (
+            <MainLayout title="">
+                <div>Error: {error}</div>
+            </MainLayout>
+        );
+    if (!employees)
+        return (
+            <MainLayout title="">
+                <div>No employees found.</div>
+            </MainLayout>
+        );
 
     return (
         <MainLayout title="Employee">
@@ -101,9 +114,7 @@ export default function EmployeePage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="max-w-sm"
                     />
-                    <Button onClick={() => router.push("/admin/employee/add")}>
-                        Add Employee
-                    </Button>
+                    <Button onClick={handleAdd}>Add Employee</Button>
                 </div>
                 <div className="rounded-md border">
                     <Table>
@@ -113,7 +124,6 @@ export default function EmployeePage() {
                                 <TableHead>Email</TableHead>
                                 <TableHead>Department</TableHead>
                                 <TableHead>Role</TableHead>
-                                {/* <TableHead>Status</TableHead> */}
                                 <TableHead className="text-right">
                                     Actions
                                 </TableHead>
@@ -125,7 +135,7 @@ export default function EmployeePage() {
                                     key={employee.id}
                                     onClick={() =>
                                         router.push(
-                                            `/admin/employee/${employee.id}`
+                                            `/admin/employee/detail/${employee.id}`
                                         )
                                     }
                                     className="cursor-pointer"
@@ -139,7 +149,7 @@ export default function EmployeePage() {
                                                     }
                                                 />
                                                 <AvatarFallback>
-                                                    {employee.fullName.charAt(
+                                                    {employee.fullName?.charAt(
                                                         0
                                                     )}
                                                 </AvatarFallback>
@@ -149,23 +159,9 @@ export default function EmployeePage() {
                                     </TableCell>
                                     <TableCell>{employee.email}</TableCell>
                                     <TableCell>
-                                        {employee.departmentId}
+                                        {employee.department?.name}
                                     </TableCell>
                                     <TableCell>{employee.jobTitle}</TableCell>
-                                    {/* <TableCell>
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-xs font-semibold
-                    ${
-                        employee.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : employee.status === "On Leave"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                    }`}
-                                        >
-                                            {employee.status}
-                                        </span>
-                                    </TableCell> */}
                                     <TableCell className="text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -184,8 +180,11 @@ export default function EmployeePage() {
                                                     Actions
                                                 </DropdownMenuLabel>
                                                 <DropdownMenuItem
-                                                    onClick={() =>
-                                                        handleEdit(employee.id)
+                                                    onClick={(event) =>
+                                                        handleEdit(
+                                                            employee.id as string,
+                                                            event
+                                                        )
                                                     }
                                                 >
                                                     <Pencil className="mr-2 h-4 w-4" />
@@ -195,12 +194,12 @@ export default function EmployeePage() {
                                                 <DropdownMenuItem
                                                     onClick={() =>
                                                         handleDelete(
-                                                            employee.id
+                                                            employee.id as string
                                                         )
                                                     }
                                                 >
                                                     <Trash2 className="mr-2 h-4 w-4" />
-                                                    Delete
+                                                    Lay off
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -211,6 +210,15 @@ export default function EmployeePage() {
                     </Table>
                 </div>
             </div>
+            <EditEmployeeModal
+                isOpen={isDialogOpen}
+                onClose={handleCloseEditModal}
+                employeeId={editEmployeeId}
+            />
+            <AddEmployeeModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+            />
         </MainLayout>
     );
 }

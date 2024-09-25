@@ -1,8 +1,6 @@
 "use client";
 
 import { Filter, MoreHorizontal, Plus } from "lucide-react";
-import Image from "next/image";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,40 +11,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import MainLayout from "@/app/components/MainLayout";
-import { useEffect, useState } from "react";
-type Department = {
-    id: number;
-    name: string;
-    description: string;
-    image: string;
-};
-
-const departments: Department[] = [
-    {
-        id: 1,
-        name: "Ronald Richards",
-        description: "Project Manager",
-        image: "/placeholder.svg?height=100&width=100",
-    },
-    {
-        id: 2,
-        name: "Cameron Williamson",
-        description: "UI Designer",
-        image: "/placeholder.svg?height=100&width=100",
-    },
-    {
-        id: 3,
-        name: "Kathryn Murphy",
-        description: "UI Designer",
-        image: "/placeholder.svg?height=100&width=100",
-    },
-    {
-        id: 4,
-        name: "Floyd Miles",
-        description: "Digital Marketing",
-        image: "/placeholder.svg?height=100&width=100",
-    },
-];
+import { useCallback, useEffect } from "react";
+import { useDepartment } from "@/hooks/useDepartment";
 
 export default function EmployeeDashboard() {
     // const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
@@ -58,29 +24,16 @@ export default function EmployeeDashboard() {
     //             : [...prev, id]
     //     );
     // };
-    const [departments, setDepartments] = useState<Department[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+
+    const { departments, loading, error, fetchDepartments } = useDepartment();
+
+    const memoizedFetchDepartments = useCallback(fetchDepartments, [
+        fetchDepartments,
+    ]);
 
     useEffect(() => {
-        const fetchDepartments = async () => {
-            try {
-                const res = await fetch("http://localhost:8080/department");
-                const data = await res.json();
-                setDepartments(data);
-            } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("An unexpected error occurred");
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDepartments();
-    }, []);
+        memoizedFetchDepartments();
+    }, [memoizedFetchDepartments]);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;

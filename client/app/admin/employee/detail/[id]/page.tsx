@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import MainLayout from "../../../components/MainLayout";
+import MainLayout from "../../../../components/MainLayout";
 
 interface Employee {
     id: string;
@@ -15,7 +15,6 @@ interface Employee {
 
 export default function EmployeeDetailPage() {
     const params = useParams();
-    console.log("params", params.id);
     const id = params.id;
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [loading, setLoading] = useState(true);
@@ -31,8 +30,10 @@ export default function EmployeeDetailPage() {
                     if (!res.ok) {
                         throw new Error("Failed to fetch employee details");
                     }
-                    const data: Employee = await res.json();
-                    setEmployee(data);
+                    const data = await res.json();
+                    if (data.success) {
+                        setEmployee(data.result);
+                    }
                 } catch (err: unknown) {
                     if (err instanceof Error) {
                         setError(err.message);

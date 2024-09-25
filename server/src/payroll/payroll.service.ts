@@ -13,42 +13,60 @@ export class PayrollService {
 //     });
 //   }
 
-  findAll() {
-    return this.prisma.payroll.findMany();
+  async findAll() {
+    const payrolls = await this.prisma.payroll.findMany();
+    return {
+      success: Boolean(payrolls.length),
+      result: payrolls.length ? payrolls : "Không tìm thấy bảng lương!!!",
+    };
   }
 
-  findOne(id: string) {
-    return this.prisma.payroll.findUnique({
+  async findOne(id: string) {
+    const payroll = await this.prisma.payroll.findUnique({
       where: {
         id,
       },
     });
+    return {
+      success: Boolean(payroll),
+      result: payroll || "Không tìm thấy bảng lương!!!",
+    };
   }
 
-  update(id: string, updatePayrollDto: UpdatePayrollDto) {
-    return this.prisma.payroll.update({
+  async update(id: string, updatePayrollDto: UpdatePayrollDto) {
+    const payroll = await this.prisma.payroll.update({
       where: {
         id,
       },
       data: updatePayrollDto,
     });
+    return {
+      success: Boolean(payroll),
+      result: payroll || "Không tìm thấy bảng lương!!!",
+    };
   }
 
-  remove(id: string) {
-    return this.prisma.payroll.delete({
+  async remove(id: string) {
+    const payroll = await this.prisma.payroll.delete({
       where: {
         id,
       },
     });
+    return {
+      success: Boolean(payroll),
+      result: payroll || "Không tìm thấy bảng lương!!!",
+    };
   }
-
-
 
   // Fetch payroll for an employee
   async getPayroll(employeeId: string) {
-    return this.prisma.payroll.findMany({
+    const payrolls = await this.prisma.payroll.findMany({
       where: { employeeId },
     });
+    return {
+      success: Boolean(payrolls.length),
+      result: payrolls.length ? payrolls : "Không tìm thấy bảng lương!!!",
+    };
   }
 
   // Process payroll for an employee
@@ -57,7 +75,7 @@ export class PayrollService {
     baseSalary: number,
     bonuses: { amount: number; reason: string }[],
     penalties: { amount: number; reason: string }[],
-  ): Promise<Payroll> {
+  ): Promise<{ success: boolean; result: Payroll | string }> {
     // Create payroll entry first
     const payroll = await this.prisma.payroll.create({
       data: {
@@ -103,8 +121,9 @@ export class PayrollService {
       data: { finalSalary: finalSalary },
     });
 
-    return payroll;
+    return {
+      success: Boolean(payroll),
+      result: payroll || "Không tìm thấy bảng lương!!!",
+    };
   }
-
-
 }

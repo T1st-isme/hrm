@@ -1,6 +1,13 @@
 import { IsString, IsEmail, IsDate, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateEmployeeDto {
+    @IsString()
+    firstName: string;
+
+    @IsString()
+    lastName: string;
+
     @IsEmail()
     email: string;
 
@@ -15,10 +22,8 @@ export class CreateEmployeeDto {
     @IsOptional()
     contactNumber: string;
 
-    @IsString()
-    fullName: string;
-
     @IsDate()
+    @Type(() => Date)
     dateOfBirth: Date;
 
     @IsString()
@@ -29,5 +34,4 @@ export class CreateEmployeeDto {
 
     @IsString()
     departmentId: string;
-
 }

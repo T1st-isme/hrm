@@ -6,44 +6,73 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class EmployeeService {
     constructor(private prisma: PrismaService) {}
-  create(createEmployeeDto: CreateEmployeeDto) {
-    return this.prisma.employee.create({
-      data:  {
-        ...createEmployeeDto,
-        dateOfBirth: new Date(createEmployeeDto.dateOfBirth).toISOString(),
-      }
-    });
-  }
 
-  findAll() {
-    return this.prisma.employee.findMany();
-  }
+    async create(createEmployeeDto: CreateEmployeeDto) {
+        const employee = await this.prisma.employee.create({
+            data:  {
+                ...createEmployeeDto,
+                fullName: `${createEmployeeDto.firstName} ${createEmployeeDto.lastName}`,
+                dateOfBirth: new Date(createEmployeeDto.dateOfBirth).toISOString(),
+            }
+        });
+        return {
+            success: Boolean(employee),
+            result: employee || "Không tạo được nhân viên!!!",
+        };
+    }
 
-  findOne(id: string) {
-    return this.prisma.employee.findUnique({
-      where: {
-        id,
-      },
-    });
-  }
+    async findAll() {
+        const employees = await this.prisma.employee.findMany({
+            include: {
+                department: true,
+            },
+        });
+        return {
+            success: Boolean(employees),
+            result: employees || "Không tìm thấy nhân viên!!!",
+        };
+    }
 
-  update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
-    return this.prisma.employee.update({
-      where: {
-        id,
-      },
-      data: {
-        ...updateEmployeeDto,
-        dateOfBirth: new Date(updateEmployeeDto.dateOfBirth).toISOString(),
-      },
-    });
-  }
+    async findOne(id: string) {
+        const employee = await this.prisma.employee.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                department: true,
+            },
+        });
+        return {
+            success: Boolean(employee),
+            result: employee || "Không tìm thấy nhân viên!!!",
+        };
+    }
 
-  remove(id: string) {
-    return this.prisma.employee.delete({
-      where: {
-        id,
-      },
-    });
-  }
+    async update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
+        const employee = await this.prisma.employee.update({
+            where: {
+                id,
+            },
+            data: {
+                ...updateEmployeeDto,
+                dateOfBirth: new Date(updateEmployeeDto.dateOfBirth).toISOString(),
+            },
+        });
+        return {
+            success: Boolean(employee),
+            result: employee || "Không tìm thấy nhân viên!!!",
+        };
+    }
+
+    async remove(id: string) {
+        const employee = await this.prisma.employee.delete({
+            where: {
+                id,
+            },
+        });
+        return {
+            success: Boolean(employee),
+            result: employee || "Không tìm thấy nhân viên!!!",
+        };
+    }
 }
