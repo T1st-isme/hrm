@@ -30,11 +30,8 @@ export default function EditDepartmentModal({
     onClose: () => void;
     departmentId: string;
 }) {
-    const { getDepartmentById, updateDepartment, department } = useDepartment();
-    const [currentDepartmentId, setCurrentDepartmentId] = useState<
-        string | null
-    >(null);
-    const [loading, setLoading] = useState(false);
+    const { getDepartmentById, updateDepartment, department, loading, error } =
+        useDepartment();
 
     const defaultValues = useMemo(
         () => ({
@@ -50,18 +47,11 @@ export default function EditDepartmentModal({
         defaultValues,
     });
 
-    const memoizedGetDepartmentById = useCallback(() => {
-        if (departmentId && departmentId !== currentDepartmentId) {
-            getDepartmentById(departmentId);
-            setCurrentDepartmentId(departmentId);
-        }
-    }, [departmentId, getDepartmentById, currentDepartmentId]);
-
     useEffect(() => {
-        if (isOpen) {
-            memoizedGetDepartmentById();
+        if (departmentId) {
+            getDepartmentById(departmentId);
         }
-    }, [isOpen, memoizedGetDepartmentById]);
+    }, [getDepartmentById, departmentId]);
 
     useEffect(() => {
         if (department && department.id === departmentId) {
@@ -71,19 +61,18 @@ export default function EditDepartmentModal({
 
     const onSubmit = useCallback(
         async (values: z.infer<typeof formSchema>) => {
-            setLoading(true);
             try {
                 await updateDepartment(departmentId, values);
                 onClose();
             } catch (error) {
                 console.error("Failed to update department:", error);
-            } finally {
-                setLoading(false);
             }
         },
         [departmentId, updateDepartment, onClose]
     );
 
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
     return (
         <CustomDialog isOpen={isOpen} onClose={onClose} title="Edit Department">
             <Form {...form}>

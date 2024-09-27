@@ -54,13 +54,10 @@ export default function EditEmployeeModal({
     onClose: () => void;
     employeeId: string;
 }) {
-    const { getEmployeeById, updateEmployee, employee } = useEmployee();
+    const { getEmployeeById, updateEmployee, employee, loading } =
+        useEmployee();
     const { departments, fetchDepartments } = useDepartment();
     const [avatar, setAvatar] = useState<File | string | null>(null);
-    const [currentEmployeeId, setCurrentEmployeeId] = useState<string | null>(
-        null
-    );
-    const [loading, setLoading] = useState(false);
 
     const defaultValues = useMemo(
         () => ({
@@ -83,25 +80,14 @@ export default function EditEmployeeModal({
         defaultValues,
     });
 
-    const memoizedGetEmployeeById = useCallback(() => {
-        if (employeeId && employeeId !== currentEmployeeId) {
-            getEmployeeById(employeeId);
-            setCurrentEmployeeId(employeeId);
-        }
-    }, [employeeId, getEmployeeById, currentEmployeeId]);
-
-    const memoizedFetchDepartments = useCallback(() => {
-        if (!departments.length) {
-            fetchDepartments();
-        }
-    }, [departments.length, fetchDepartments]);
-
     useEffect(() => {
-        if (isOpen) {
-            memoizedGetEmployeeById();
-            memoizedFetchDepartments();
+        if (employeeId) {
+            getEmployeeById(employeeId);
+            if (departments.length === 0) {
+                fetchDepartments();
+            }
         }
-    }, [isOpen, memoizedGetEmployeeById, memoizedFetchDepartments]);
+    }, [employeeId, getEmployeeById, fetchDepartments, departments]);
 
     useEffect(() => {
         if (employee && employee.id === employeeId) {
@@ -112,14 +98,11 @@ export default function EditEmployeeModal({
 
     const onSubmit = useCallback(
         async (values: z.infer<typeof formSchema>) => {
-            setLoading(true);
             try {
                 await updateEmployee(employeeId, values, avatar);
                 onClose();
             } catch (error) {
                 console.error("Failed to update employee:", error);
-            } finally {
-                setLoading(false);
             }
         },
         [employeeId, updateEmployee, onClose, avatar]
@@ -361,7 +344,7 @@ export default function EditEmployeeModal({
                                         <Select
                                             onValueChange={field.onChange}
                                             defaultValue={
-                                                employee?.department?.id
+                                                employee?.departmentId
                                             }
                                         >
                                             <FormControl>
@@ -378,7 +361,7 @@ export default function EditEmployeeModal({
                                                                     department.id
                                                                 }
                                                                 value={
-                                                                    department.id
+                                                                    department.id as string
                                                                 }
                                                             >
                                                                 {

@@ -10,8 +10,6 @@ import {
 interface Department {
     id: string;
     name: string;
-    image?: string | null;
-    description?: string | null;
 }
 
 interface Employee {
@@ -53,7 +51,7 @@ interface EmployeeStore {
     closeDialog: () => void;
 }
 
-export const useEmployeeStore = create<EmployeeStore>((set) => ({
+export const useEmployeeStore = create<EmployeeStore>((set, get) => ({
     employees: [],
     loading: false,
     error: null,
@@ -86,8 +84,12 @@ export const useEmployeeStore = create<EmployeeStore>((set) => ({
         set({ loading: true, error: null });
         try {
             const res = await getEmployees();
-            if(res.success){
-                set({ employees: res.result, loading: false });
+            if (res.success) {
+                if (res.result.length > 0) {
+                    set({ employees: res.result, loading: false });
+                } else {
+                    set({ employees: [], loading: false });
+                }
             }
         } catch (error) {
             set({ error: "Failed to fetch employees" + error, loading: false });
@@ -118,20 +120,27 @@ export const useEmployeeStore = create<EmployeeStore>((set) => ({
 
             const newEmployee = await createEmployee(formData);
             if (newEmployee.success) {
-                set((state) => ({
-                    employees: [...state.employees, newEmployee.result],
+                set(() => ({
+                    employees: [...get().employees, newEmployee.result],
                     loading: false,
                 }));
+            }
+            else {
+                set({ error: "Failed to add employee" + newEmployee.error, loading: false });
             }
         } catch (error) {
             set({ error: "Failed to add employee" + error, loading: false });
         }
     },
 
-    updateEmployee: async (id: string, employeeData: Employee, profilePicture: File | string | null) => {
+    updateEmployee: async (
+        id: string,
+        employeeData: Employee,
+        profilePicture: File | string | null
+    ) => {
         set({ loading: true, error: null });
         try {
-          // Create FormData for update
+            // Create FormData for update
           const formData = new FormData();
           formData.append('firstName', employeeData.firstName);
           formData.append('lastName', employeeData.lastName);
@@ -148,14 +157,20 @@ export const useEmployeeStore = create<EmployeeStore>((set) => ({
           }
 
           const updatedEmployee = await updateEmployee(id, formData);
-          set((state) => ({
-            employees: state.employees.map((employee) =>
-              employee.id === updatedEmployee.id ? updatedEmployee : employee
-            ),
-            loading: false,
-          }));
+            if (updatedEmployee.success) {
+                set({
+                    employees: get().employees.map((employee) =>
+                        employee.id === id ? updatedEmployee.result : employee
+                    ),
+                    loading: false,
+                });
+                set({ employee: updatedEmployee.result });
+            }
+            else {
+                set({ error: "Failed to update employee" + updatedEmployee.error, loading: false });
+            }
         } catch (error) {
-          set({ error: 'Failed to update employee' + error, loading: false });
+            set({ error: "Failed to update employee" + error, loading: false });
         }
     },
 

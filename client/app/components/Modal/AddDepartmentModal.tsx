@@ -18,7 +18,7 @@ import { useDepartment } from "@/hooks/useDepartment";
 const formSchema = z.object({
     name: z.string({ required_error: "Department name is required" }),
     description: z.string({ required_error: "Description is required" }),
-    image: z.string({ required_error: "Image URL is required" }).url(),
+    image: z.string(),
 });
 
 export default function AddDepartmentModal({
@@ -50,7 +50,7 @@ export default function AddDepartmentModal({
     }, [isOpen, form, defaultValues]);
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
-        addDepartment({ ...values, id: Date.now().toString() });
+        addDepartment(values);
         onClose();
     };
 

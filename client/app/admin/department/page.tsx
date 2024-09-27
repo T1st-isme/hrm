@@ -17,35 +17,44 @@ import AddDepartmentModal from "@/app/components/Modal/AddDepartmentModal";
 import EditDepartmentModal from "@/app/components/Modal/EditDepartmentModal";
 
 export default function DepartmentPage() {
-    const { departments, loading, error, fetchDepartments, isDialogOpen, openDialog, closeDialog } = useDepartment();
+    const {
+        departments,
+        loading,
+        error,
+        fetchDepartments,
+        isDialogOpen,
+        openDialog,
+        closeDialog,
+    } = useDepartment();
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [editDepartmentId, setEditDepartmentId] = useState<string>("");
 
     useEffect(() => {
         fetchDepartments();
     }, [fetchDepartments]);
 
-    const handleAdd = () => {
+    const handleAdd = useCallback(() => {
         setIsAddModalOpen(true);
+    }, []);
 
-    };
-
-    const handleEdit = (id: string) => {
-        setEditDepartmentId(id);
-        setIsEditModalOpen(true);
-    };
+    const handleEdit = useCallback(
+        (id: string | undefined) => {
+            if (id) {
+                setEditDepartmentId(id);
+                openDialog();
+            }
+        },
+        [openDialog]
+    );
 
     const handleCloseEditModal = useCallback(() => {
-        setIsEditModalOpen(false);
+        closeDialog();
         fetchDepartments();
-    }, [fetchDepartments]);
+    }, [closeDialog, fetchDepartments]);
 
-    if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
     if (!departments || departments.length === 0)
         return <div>No departments found.</div>;
-
     return (
         <MainLayout title="Department">
             <div className="container mx-auto p-6 bg-gray-100">
@@ -79,9 +88,7 @@ export default function DepartmentPage() {
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuItem
                                                 onClick={() =>
-                                                    handleEdit(
-                                                        department.id as string
-                                                    )
+                                                    handleEdit(department.id)
                                                 }
                                             >
                                                 Edit
@@ -96,7 +103,9 @@ export default function DepartmentPage() {
                                     <Avatar className="h-20 w-20 mb-4">
                                         <AvatarImage src={department.image} />
                                         <AvatarFallback>
-                                            {department.name.charAt(0)}
+                                            {department.name
+                                                ? department.name.charAt(0)
+                                                : "?"}
                                         </AvatarFallback>
                                     </Avatar>
                                     <h3 className="font-semibold text-lg">
@@ -116,7 +125,7 @@ export default function DepartmentPage() {
                 onClose={() => setIsAddModalOpen(false)}
             />
             <EditDepartmentModal
-                isOpen={isEditModalOpen}
+                isOpen={isDialogOpen}
                 onClose={handleCloseEditModal}
                 departmentId={editDepartmentId}
             />

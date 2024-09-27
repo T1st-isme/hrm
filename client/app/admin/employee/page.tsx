@@ -80,9 +80,9 @@ export default function EmployeePage() {
 
     const handleCloseEditModal = useCallback(() => {
         closeDialog();
-        // Refresh the employees list after closing the edit modal
-        fetchEmployees();
-    }, [closeDialog, fetchEmployees]);
+        // // Refresh the employees list after closing the edit modal
+        // fetchEmployees();
+    }, [closeDialog]);
 
     if (loading)
         return (
