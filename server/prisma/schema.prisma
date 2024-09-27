@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,31 +11,41 @@ datasource db {
 }
 
 model Employee {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  firstName      String
-  lastName       String
-  email          String   @unique
-  password       String
-  profilePicture String? @default("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png")
-  contactNumber  String?
-  fullName       String
-  dateOfBirth    DateTime
-  address        String
-  employmentStartDate DateTime @default(now())
-  jobTitle       String
-  department     Department? @relation(fields: [departmentId], references: [id])
-  departmentId   String? @db.ObjectId
-  salary         Float?
-  leaveRequests  LeaveRequest[]
-  payrolls       Payroll[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+  firstName            String
+  lastName             String
+  email                String             @unique
+  password             String
+  profilePicture       String?            @default("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png")
+  contactNumber        String?
+  fullName             String
+  dateOfBirth          DateTime
+  address              String
+  employmentStartDate  DateTime           @default(now())
+  jobTitle             String
+  department           Department?        @relation(fields: [departmentId], references: [id])
+  departmentId         String?            @db.ObjectId
+  salary               Float?
+  status               EmployeeStatus     @default(IN_WORKING)
+  leaveRequests        LeaveRequest[]
+  payrolls             Payroll[]
+  employeeRoles        EmployeeRole[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+enum EmployeeStatus {
+  IN_WORKING
+  LAY_OFF
+  RESIGNED
+  RETIRED
+  ON_LEAVE
 }
 
 model LeaveRequest {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   employee       Employee @relation(fields: [employeeId], references: [id])
-  employeeId     String @db.ObjectId
+  employeeId     String   @db.ObjectId
   startDate      DateTime
   endDate        DateTime
   status         LeaveStatus @default(PENDING)
@@ -51,6 +58,20 @@ model Department {
   image          String?
   description    String?
   employees      Employee[]
+}
+
+model Role {
+  id             String             @id @default(auto()) @map("_id") @db.ObjectId
+  name           String             @unique
+  employeeRoles  EmployeeRole[]
+}
+
+model EmployeeRole {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId  String   @db.ObjectId
+  roleId      String   @db.ObjectId
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  role        Role     @relation(fields: [roleId], references: [id])
 }
 
 enum LeaveStatus {

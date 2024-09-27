@@ -1,10 +1,18 @@
-"use client";
-
+import { useAuth } from "@/hooks/useAuth";
 import { Navbar } from "flowbite-react";
+import { Loader2 } from "lucide-react";
 import { FaSearch, FaPlus, FaBell } from "react-icons/fa";
 
 export default function NavbarComponent({ title }: { title: string }) {
-    return (
+    const { loading, user } = useAuth();
+
+    return loading ? (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="flex items-center justify-center">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        </div>
+    ) : (
         <Navbar fluid rounded>
             <Navbar.Brand>
                 <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
@@ -28,21 +36,23 @@ export default function NavbarComponent({ title }: { title: string }) {
                 <button className="ml-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
                     <FaBell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                 </button>
-                <div className="ml-4 flex items-center">
-                    <img
-                        className="h-8 w-8 rounded-full"
-                        src="https://via.placeholder.com/150"
-                        alt="User profile"
-                    />
-                    <div className="ml-2">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            Nivedha
-                        </div>
-                        <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            Admin
+                {user && (
+                    <div className="ml-4 flex items-center">
+                        <img
+                            className="h-8 w-8 rounded-full"
+                            src={user.profilePicture}
+                            alt="User profile"
+                        />
+                        <div className="ml-2">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                {user.firstName} {user.lastName}
+                            </div>
+                            <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                {user.roles?.name}
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </Navbar>
     );

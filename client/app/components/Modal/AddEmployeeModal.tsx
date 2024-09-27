@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import {
     Select,
     SelectContent,
@@ -52,10 +52,31 @@ export default function AddEmployeeModal({
     isOpen: boolean;
     onClose: () => void;
 }) {
-    const { addEmployee, loading } = useEmployee();
-    const [avatar, setAvatar] = useState<string | null>(null);
+    const { addEmployee } = useEmployee();
+    const [avatar, setAvatar] = useState<File | null>(null);
     const { departments, fetchDepartments } = useDepartment();
     const fetchedRef = useRef(false);
+
+    const defaultValues = useMemo(
+        () => ({
+            firstName: "",
+            lastName: "",
+            profilePicture: "",
+            dateOfBirth: "",
+            email: "",
+            password: "",
+            address: "",
+            contactNumber: "",
+            jobTitle: "",
+            departmentId: "",
+        }),
+        []
+    );
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues,
+    });
 
     useEffect(() => {
         if (isOpen && !fetchedRef.current) {
@@ -64,24 +85,21 @@ export default function AddEmployeeModal({
         }
     }, [isOpen, fetchDepartments]);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            firstName: "",
-            lastName: "",
-            profilePicture: "",
-            dateOfBirth: undefined,
-            email: "",
-            password: "",
-            address: "",
-            contactNumber: "",
-            jobTitle: "",
-            departmentId: "",
-        },
-    });
+    useEffect(() => {
+        if (!isOpen) {
+            form.reset(defaultValues);
+            setAvatar(null);
+        }
+    }, [isOpen, form, defaultValues]);
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
-        addEmployee(values);
+        const formattedValues = {
+            ...values,
+            dateOfBirth: values.dateOfBirth
+                ? format(new Date(values.dateOfBirth), "yyyy-MM-dd")
+                : "",
+        };
+        addEmployee(formattedValues, avatar);
         onClose();
     };
 
@@ -90,14 +108,14 @@ export default function AddEmployeeModal({
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setAvatar(reader.result as string);
+                setAvatar(file);
             };
             reader.readAsDataURL(file);
         }
     };
 
     return (
-        <CustomDialog isOpen={isOpen} onClose={onClose}>
+        <CustomDialog isOpen={isOpen} onClose={onClose} title="Add Employee">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -111,8 +129,9 @@ export default function AddEmployeeModal({
                             <Avatar className="w-24 h-24">
                                 <AvatarImage
                                     src={
-                                        avatar ||
-                                        "/placeholder.svg?height=96&width=96"
+                                        avatar
+                                            ? URL.createObjectURL(avatar)
+                                            : "/placeholder.svg?height=96&width=96"
                                     }
                                 />
                                 <AvatarFallback>Avatar</AvatarFallback>
@@ -207,9 +226,22 @@ export default function AddEmployeeModal({
                                                 <CalendarComponent
                                                     mode="single"
                                                     selected={
-                                                        field.value as unknown as Date
+                                                        field.value
+                                                            ? new Date(
+                                                                  field.value
+                                                              )
+                                                            : undefined
                                                     }
-                                                    onSelect={field.onChange}
+                                                    onSelect={(date) =>
+                                                        field.onChange(
+                                                            date
+                                                                ? format(
+                                                                      date,
+                                                                      "yyyy-MM-dd"
+                                                                  )
+                                                                : ""
+                                                        )
+                                                    }
                                                     disabled={(date) =>
                                                         date > new Date() ||
                                                         date <
@@ -218,6 +250,9 @@ export default function AddEmployeeModal({
                                                             )
                                                     }
                                                     initialFocus
+                                                    captionLayout="dropdown-buttons"
+                                                    fromYear={1900}
+                                                    toYear={new Date().getFullYear()}
                                                 />
                                             </PopoverContent>
                                         </Popover>

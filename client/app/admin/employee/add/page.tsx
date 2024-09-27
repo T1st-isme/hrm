@@ -1,372 +1,171 @@
-// "use client";
+"use client";
+import * as React from "react";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TablePagination from "@mui/material/TablePagination";
+import TableRow from "@mui/material/TableRow";
+import MainLayout from "@/app/components/MainLayout";
 
-// import { useEffect, useState } from "react";
-// import { Calendar } from "lucide-react";
+interface Column {
+    id: "name" | "code" | "population" | "size" | "density";
+    label: string;
+    minWidth?: number;
+    align?: "right";
+    format?: (value: number) => string;
+}
 
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { Button } from "@/components/ui/button";
-// import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-// import {
-//     Form,
-//     FormControl,
-//     FormField,
-//     FormItem,
-//     FormLabel,
-//     FormMessage,
-// } from "@/components/ui/form";
-// import { Input } from "@/components/ui/input";
-// import {
-//     Popover,
-//     PopoverContent,
-//     PopoverTrigger,
-// } from "@/components/ui/popover";
-// import {
-//     Select,
-//     SelectContent,
-//     SelectItem,
-//     SelectTrigger,
-//     SelectValue,
-// } from "@/components/ui/select";
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { format } from "date-fns";
-// import { useForm } from "react-hook-form";
-// import * as z from "zod";
-// import { useDepartment } from "@/hooks/useDepartment";
+const columns: readonly Column[] = [
+    { id: "name", label: "Name", minWidth: 170 },
+    { id: "code", label: "ISO\u00a0Code", minWidth: 100 },
+    {
+        id: "population",
+        label: "Population",
+        minWidth: 170,
+        align: "right",
+        format: (value: number) => value.toLocaleString("en-US"),
+    },
+    {
+        id: "size",
+        label: "Size\u00a0(km\u00b2)",
+        minWidth: 170,
+        align: "right",
+        format: (value: number) => value.toLocaleString("en-US"),
+    },
+    {
+        id: "density",
+        label: "Density",
+        minWidth: 170,
+        align: "right",
+        format: (value: number) => value.toFixed(2),
+    },
+];
 
-// const formSchema = z.object({
-//     firstName: z.string({ required_error: "First name is required" }),
-//     lastName: z.string({ required_error: "Last name is required" }),
-//     profilePicture: z.string({ required_error: "Profile picture is required" }),
-//     dateOfBirth: z.date(),
-//     email: z.string({ required_error: "Invalid email address" }).email(),
-//     password: z.string({ required_error: "Password is required" }),
-//     address: z.string({ required_error: "Address is required" }),
-//     contactNumber: z.string({ required_error: "Phone number is required" }),
-//     jobTitle: z.string({ required_error: "Job title is required" }),
-//     department: z.string({ required_error: "Department is required" }),
-// });
+interface Data {
+    name: string;
+    code: string;
+    population: number;
+    size: number;
+    density: number;
+}
 
-// export default function AddEmployeeForm({
-//     closeDialog,
-//     onSubmit,
-// }: {
-//     closeDialog: () => void;
-//     onSubmit: (employee: z.infer<typeof formSchema>) => void;
-// }) {
-//     const [avatar, setAvatar] = useState<string | null>(null);
-//     //fetch department
-//     const { departments, fetchDepartments } = useDepartment();
+function createData(
+    name: string,
+    code: string,
+    population: number,
+    size: number
+): Data {
+    const density = population / size;
+    return { name, code, population, size, density };
+}
 
-//     useEffect(() => {
-//         fetchDepartments();
-//     }, [fetchDepartments]);
+const rows = [
+    createData("India", "IN", 1324171354, 3287263),
+    createData("China", "CN", 1403500365, 9596961),
+    createData("Italy", "IT", 60483973, 301340),
+    createData("United States", "US", 327167434, 9833520),
+    createData("Canada", "CA", 37602103, 9984670),
+    createData("Australia", "AU", 25475400, 7692024),
+    createData("Germany", "DE", 83019200, 357578),
+    createData("Ireland", "IE", 4857000, 70273),
+    createData("Mexico", "MX", 126577691, 1972550),
+    createData("Japan", "JP", 126317000, 377973),
+    createData("France", "FR", 67022000, 640679),
+    createData("United Kingdom", "GB", 67545757, 242495),
+    createData("Russia", "RU", 146793744, 17098246),
+    createData("Nigeria", "NG", 200962417, 923768),
+    createData("Brazil", "BR", 210147125, 8515767),
+];
 
-//     const form = useForm<z.infer<typeof formSchema>>({
-//         resolver: zodResolver(formSchema),
-//         defaultValues: {
-//             firstName: "",
-//             lastName: "",
-//             profilePicture: "",
-//             dateOfBirth: undefined,
-//             email: "",
-//             password: "",
-//             address: "",
-//             contactNumber: "",
-//             jobTitle: "",
-//             department: "",
-//         },
-//     });
-//     const handleSubmit = (values: z.infer<typeof formSchema>) => {
-//         onSubmit(values);
-//         closeDialog();
-//     };
-//     const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-//         const file = event.target.files?.[0];
-//         if (file) {
-//             const reader = new FileReader();
-//             reader.onloadend = () => {
-//                 setAvatar(reader.result as string);
-//             };
-//             reader.readAsDataURL(file);
-//         }
-//     };
+export default function StickyHeadTable() {
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
-//     return (
-//         <div className="container mx-auto p-6 bg-gray-100">
-//             <div className="bg-white p-6 rounded-lg shadow">
-//                 <h2 className="text-2xl font-bold mb-6">Add Employee</h2>
-//                 <Form {...form}>
-//                     <form
-//                         onSubmit={form.handleSubmit(handleSubmit)}
-//                         className="space-y-8"
-//                     >
-//                         <div>
-//                             <h3 className="text-lg font-semibold mb-4">
-//                                 General Information
-//                             </h3>
-//                             <div className="flex items-center space-x-4 mb-4">
-//                                 <Avatar className="w-24 h-24">
-//                                     <AvatarImage
-//                                         src={
-//                                             avatar ||
-//                                             "/placeholder.svg?height=96&width=96"
-//                                         }
-//                                     />
-//                                     <AvatarFallback>Avatar</AvatarFallback>
-//                                 </Avatar>
-//                                 <div>
-//                                     <Button
-//                                         type="button"
-//                                         variant="secondary"
-//                                         onClick={() =>
-//                                             document
-//                                                 .getElementById("avatar-upload")
-//                                                 ?.click()
-//                                         }
-//                                     >
-//                                         Upload Avatar
-//                                     </Button>
-//                                     <Input
-//                                         id="avatar-upload"
-//                                         type="file"
-//                                         className="hidden"
-//                                         onChange={handleAvatarUpload}
-//                                         accept="image/*"
-//                                     />
-//                                     <p className="text-sm text-gray-500 mt-2">
-//                                         Please upload a .jpg or a .png file with
-//                                         a minimum dimension of 400x x 400h not
-//                                         exceeding 5MB
-//                                     </p>
-//                                 </div>
-//                             </div>
-//                             <div className="grid grid-cols-3 gap-4">
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="firstName"
-//                                     render={({ field }) => (
-//                                         <FormItem>
-//                                             <FormLabel>First Name</FormLabel>
-//                                             <FormControl>
-//                                                 <Input {...field} />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="lastName"
-//                                     render={({ field }) => (
-//                                         <FormItem>
-//                                             <FormLabel>Last Name</FormLabel>
-//                                             <FormControl>
-//                                                 <Input {...field} />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="dateOfBirth"
-//                                     render={({ field }) => (
-//                                         <FormItem className="flex flex-col">
-//                                             <FormLabel>Date of Birth</FormLabel>
-//                                             <Popover>
-//                                                 <PopoverTrigger asChild>
-//                                                     <FormControl>
-//                                                         <Button
-//                                                             variant={"outline"}
-//                                                             className={`w-full pl-3 text-left font-normal ${
-//                                                                 !field.value &&
-//                                                                 "text-muted-foreground"
-//                                                             }`}
-//                                                         >
-//                                                             {field.value ? (
-//                                                                 format(
-//                                                                     field.value,
-//                                                                     "MM/dd/yyyy"
-//                                                                 )
-//                                                             ) : (
-//                                                                 <span>
-//                                                                     Pick a date
-//                                                                 </span>
-//                                                             )}
-//                                                             <Calendar className="ml-auto h-4 w-4 opacity-50" />
-//                                                         </Button>
-//                                                     </FormControl>
-//                                                 </PopoverTrigger>
-//                                                 <PopoverContent
-//                                                     className="w-auto p-0"
-//                                                     align="start"
-//                                                 >
-//                                                     <CalendarComponent
-//                                                         mode="single"
-//                                                         selected={field.value}
-//                                                         onSelect={
-//                                                             field.onChange
-//                                                         }
-//                                                         disabled={(date) =>
-//                                                             date > new Date() ||
-//                                                             date <
-//                                                                 new Date(
-//                                                                     "1900-01-01"
-//                                                                 )
-//                                                         }
-//                                                         initialFocus
-//                                                     />
-//                                                 </PopoverContent>
-//                                             </Popover>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="email"
-//                                     render={({ field }) => (
-//                                         <FormItem>
-//                                             <FormLabel>Email</FormLabel>
-//                                             <FormControl>
-//                                                 <Input
-//                                                     {...field}
-//                                                     type="email"
-//                                                 />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="password"
-//                                     render={({ field }) => (
-//                                         <FormItem>
-//                                             <FormLabel>Password</FormLabel>
-//                                             <FormControl>
-//                                                 <Input
-//                                                     {...field}
-//                                                     type="password"
-//                                                 />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                             </div>
-//                         </div>
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
 
-//                         <div>
-//                             <h3 className="text-lg font-semibold mb-4">
-//                                 Contact Information
-//                             </h3>
-//                             <div className="grid grid-cols-3 gap-4">
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="address"
-//                                     render={({ field }) => (
-//                                         <FormItem className="col-span-2">
-//                                             <FormLabel>Address</FormLabel>
-//                                             <FormControl>
-//                                                 <Input {...field} />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="contactNumber"
-//                                     render={({ field }) => (
-//                                         <FormItem>
-//                                             <FormLabel>Phone</FormLabel>
-//                                             <FormControl>
-//                                                 <Input {...field} type="tel" />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                             </div>
-//                         </div>
+    const handleChangeRowsPerPage = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setRowsPerPage(+event.target.value);
+        setPage(0);
+    };
 
-//                         <div>
-//                             <h3 className="text-lg font-semibold mb-4">
-//                                 Employment Information
-//                             </h3>
-//                             <div className="grid grid-cols-3 gap-4">
-//                                 <FormField
-//                                     control={form.control}
-//                                     name="jobTitle"
-//                                     render={({ field }) => (
-//                                         <FormItem>
-//                                             <FormLabel>
-//                                                 Job Title / Occupation
-//                                             </FormLabel>
-//                                             <FormControl>
-//                                                 <Input {...field} />
-//                                             </FormControl>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                                 <FormField
-//                                     name="department"
-//                                     render={({ field }) => (
-//                                         <FormItem>
-//                                             <FormLabel>Department</FormLabel>
-//                                             <Select
-//                                                 onValueChange={field.onChange}
-//                                                 defaultValue={field.value}
-//                                             >
-//                                                 <FormControl>
-//                                                     <SelectTrigger>
-//                                                         <SelectValue placeholder="Select a department" />
-//                                                     </SelectTrigger>
-//                                                 </FormControl>
-//                                                 <SelectContent>
-//                                                     {Array.isArray(
-//                                                         departments
-//                                                     ) &&
-//                                                         departments.map(
-//                                                             (department) => (
-//                                                                 <SelectItem
-//                                                                     key={
-//                                                                         department.id
-//                                                                     }
-//                                                                     value={
-//                                                                         department.id
-//                                                                     }
-//                                                                 >
-//                                                                     {
-//                                                                         department.name
-//                                                                     }
-//                                                                 </SelectItem>
-//                                                             )
-//                                                         )}
-//                                                 </SelectContent>
-//                                             </Select>
-//                                             <FormMessage />
-//                                         </FormItem>
-//                                     )}
-//                                 />
-//                             </div>
-//                         </div>
-
-//                         <div className="flex justify-end space-x-4">
-//                             <Button
-//                                 type="button"
-//                                 variant="outline"
-//                                 onClick={closeDialog}
-//                             >
-//                                 Cancel
-//                             </Button>
-//                             <Button type="submit">Submit</Button>
-//                         </div>
-//                     </form>
-//                 </Form>
-//             </div>
-//         </div>
-//     );
-// }
+    return (
+        <MainLayout title="Add Employee">
+            <Paper sx={{ width: "100%", overflow: "hidden" }}>
+                <TableContainer sx={{ maxHeight: 440 }}>
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                {columns.map((column) => (
+                                    <TableCell
+                                        key={column.id}
+                                        align={column.align}
+                                        style={{ minWidth: column.minWidth }}
+                                    >
+                                        {column.label}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rows
+                                .slice(
+                                    page * rowsPerPage,
+                                    page * rowsPerPage + rowsPerPage
+                                )
+                                .map((row) => {
+                                    return (
+                                        <TableRow
+                                            hover
+                                            role="checkbox"
+                                            tabIndex={-1}
+                                            key={row.code}
+                                        >
+                                            {columns.map((column) => {
+                                                const value = row[column.id];
+                                                return (
+                                                    <TableCell
+                                                        key={column.id}
+                                                        align={column.align}
+                                                        onClick={() => {
+                                                            console.log(
+                                                                "clicked" +
+                                                                    row.name
+                                                            );
+                                                        }}
+                                                    >
+                                                        {column.format &&
+                                                        typeof value ===
+                                                            "number"
+                                                            ? column.format(
+                                                                  value
+                                                              )
+                                                            : value}
+                                                    </TableCell>
+                                                );
+                                            })}
+                                        </TableRow>
+                                    );
+                                })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[10, 25, 100]}
+                    component="div"
+                    count={rows.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </Paper>
+        </MainLayout>
+    );
+}

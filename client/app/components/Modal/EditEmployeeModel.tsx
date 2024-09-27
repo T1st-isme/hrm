@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
     Select,
     SelectContent,
@@ -56,7 +56,7 @@ export default function EditEmployeeModal({
 }) {
     const { getEmployeeById, updateEmployee, employee } = useEmployee();
     const { departments, fetchDepartments } = useDepartment();
-    const [avatar, setAvatar] = useState<string | null>(null);
+    const [avatar, setAvatar] = useState<File | string | null>(null);
     const [currentEmployeeId, setCurrentEmployeeId] = useState<string | null>(
         null
     );
@@ -114,7 +114,7 @@ export default function EditEmployeeModal({
         async (values: z.infer<typeof formSchema>) => {
             setLoading(true);
             try {
-                await updateEmployee(employeeId, values);
+                await updateEmployee(employeeId, values, avatar);
                 onClose();
             } catch (error) {
                 console.error("Failed to update employee:", error);
@@ -122,7 +122,7 @@ export default function EditEmployeeModal({
                 setLoading(false);
             }
         },
-        [employeeId, updateEmployee, onClose]
+        [employeeId, updateEmployee, onClose, avatar]
     );
 
     const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,13 +130,20 @@ export default function EditEmployeeModal({
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setAvatar(reader.result as string);
+                setAvatar(file);
             };
             reader.readAsDataURL(file);
         }
     };
+
+    const avatarSrc = avatar
+        ? typeof avatar === "string"
+            ? avatar
+            : URL.createObjectURL(avatar)
+        : "/placeholder.svg?height=96&width=96";
+
     return (
-        <CustomDialog isOpen={isOpen} onClose={onClose}>
+        <CustomDialog isOpen={isOpen} onClose={onClose} title="Edit Employee">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -148,12 +155,7 @@ export default function EditEmployeeModal({
                         </h3>
                         <div className="flex items-center space-x-4 mb-4">
                             <Avatar className="w-24 h-24">
-                                <AvatarImage
-                                    src={
-                                        avatar ??
-                                        "/placeholder.svg?height=96&width=96"
-                                    }
-                                />
+                                <AvatarImage src={avatarSrc} />
                                 <AvatarFallback>
                                     {form.watch("firstName")
                                         ? form.watch("firstName").charAt(0)

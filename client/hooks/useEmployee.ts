@@ -14,7 +14,6 @@ export const useEmployee = () => {
   const isDialogOpen = useEmployeeStore((state) => state.isDialogOpen);
   const openDialog = useEmployeeStore((state) => state.openDialog);
   const closeDialog = useEmployeeStore((state) => state.closeDialog);
-
   return {
     employees,
     fetchEmployees,
