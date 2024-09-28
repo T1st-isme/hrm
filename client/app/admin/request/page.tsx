@@ -18,7 +18,6 @@ export default function RequestList() {
         rejectLeaveRequest,
     } = useRequest();
 
-
     useEffect(() => {
         getLeaveRequests();
     }, [getLeaveRequests]);
@@ -31,6 +30,15 @@ export default function RequestList() {
                 rejectLeaveRequest(id);
             }
         }, 500);
+    };
+
+    const formatDate = (date: string) => {
+        const dateObj = new Date(date);
+        return dateObj.toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
     };
 
     return (
@@ -55,42 +63,76 @@ export default function RequestList() {
                                 transition={{ duration: 0.3 }}
                             >
                                 <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                                    <CardContent className="p-6 flex items-start">
-                                        <Avatar className="h-16 w-16 mr-4">
+                                    <CardContent className="p-6 flex items-center justify-between space-x-4">
+                                        <Avatar className="h-16 w-16">
                                             <AvatarImage
                                                 src={
                                                     request.employee
-                                                        .profilePicture
+                                                        ?.profilePicture
                                                 }
-                                                alt={request.employee.fullName}
+                                                alt={request.employee?.fullName}
                                             />
                                             <AvatarFallback className="text-lg">
-                                                {request.employee.fullName
+                                                {request.employee?.fullName
                                                     .split(" ")
                                                     .map((n) => n[0])
                                                     .join("")}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div className="flex-grow">
-                                            <h2 className="text-xl font-semibold text-gray-800">
-                                                {request.employee.fullName}
-                                            </h2>
-                                            <p className="text-sm text-gray-500 mb-2">
-                                                {
-                                                    request.employee.department
-                                                        .name
-                                                }
-                                            </p>
-                                            <p className="text-gray-600 mb-4">
-                                                {request.reason}
-                                            </p>
+
+                                        <div className="flex-grow space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <h2 className="text-xl font-semibold text-gray-800">
+                                                        {
+                                                            request.employee
+                                                                ?.fullName
+                                                        }
+                                                    </h2>
+                                                    <p className="text-sm text-gray-500">
+                                                        {
+                                                            request.employee
+                                                                ?.department
+                                                                .name
+                                                        }
+                                                    </p>
+                                                </div>
+                                                <p className="text-sm text-gray-500">
+                                                    <strong>Phone:</strong>{" "}
+                                                    {
+                                                        request.employee
+                                                            ?.contactNumber
+                                                    }
+                                                </p>
+                                            </div>
+                                            <div className="bg-gray-100 rounded-lg p-3">
+                                                <p className="text-gray-600 font-medium">
+                                                    {request.reason}
+                                                </p>
+                                                <div className="flex justify-between mt-2">
+                                                    <div className="text-sm text-gray-500">
+                                                        <strong>Start:</strong>{" "}
+                                                        {formatDate(
+                                                            request.startDate
+                                                        )}
+                                                    </div>
+                                                    <hr className="mx-4 my-2 w-2/3 border-t border-gray-300" />
+                                                    <div className="text-sm text-gray-500">
+                                                        <strong>End:</strong>{" "}
+                                                        {formatDate(
+                                                            request.endDate
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col justify-center space-y-2">
+
+                                        <div className="flex flex-col space-y-2">
                                             <Button
                                                 variant="outline"
                                                 onClick={() =>
                                                     handleAction(
-                                                        request.id,
+                                                        request.id as string,
                                                         "reject"
                                                     )
                                                 }
@@ -103,7 +145,7 @@ export default function RequestList() {
                                             <Button
                                                 onClick={() =>
                                                     handleAction(
-                                                        request.id,
+                                                        request.id as string,
                                                         "approve"
                                                     )
                                                 }

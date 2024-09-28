@@ -93,8 +93,6 @@ const EmployeePage = () => {
 
     const handleCloseEditModal = useCallback(() => {
         closeDialog();
-        // // Refresh the employees list after closing the edit modal
-        // fetchEmployees();
     }, [closeDialog]);
 
     const handlePreviousPage = () => {
