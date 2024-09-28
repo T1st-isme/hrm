@@ -24,6 +24,12 @@ export class LeaveRequestController {
     return this.leaveRequestService.findAll();
   }
 
+  @Get('employee/:employeeId')
+  @Roles("admin", "user")
+  getLeaveRequestByEmployeeId(@Param('employeeId') employeeId: string) {
+    return this.leaveRequestService.getLeaveRequestByEmployeeId(employeeId);
+  }
+
   @Get(':id')
   @Roles("admin", "user")
   findOne(@Param('id') id: string) {

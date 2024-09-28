@@ -83,11 +83,11 @@ export default function EditEmployeeModal({
     useEffect(() => {
         if (employeeId) {
             getEmployeeById(employeeId);
-            if (departments.length === 0) {
+            if (!departments || departments.length === 0) {
                 fetchDepartments();
             }
         }
-    }, [employeeId, getEmployeeById, fetchDepartments, departments]);
+    }, [employeeId, departments]);
 
     useEffect(() => {
         if (employee && employee.id === employeeId) {

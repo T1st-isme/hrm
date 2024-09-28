@@ -26,6 +26,23 @@ export class LeaveRequestService {
           },
         },
       },
+      include: {
+        employee: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            contactNumber: true,
+            profilePicture: true,
+            jobTitle: true,
+            department: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return {
@@ -33,7 +50,6 @@ export class LeaveRequestService {
       result: leaveRequest ?? 'Leave request creation failed!!!',
     };
   }
-
   async findAll() {
     const leaveRequest = await this.prisma.leaveRequest.findMany({
       include: {
@@ -43,6 +59,7 @@ export class LeaveRequestService {
             contactNumber: true,
             email: true,
             jobTitle: true,
+            profilePicture: true,
             department: {
               select: {
                 name: true,
@@ -70,6 +87,32 @@ export class LeaveRequestService {
       result: leaveRequest ?? 'Leave request not found!!!',
     };
   }
+
+
+  async getLeaveRequestByEmployeeId(employeeId: string) {
+    const leaveRequest = await this.prisma.leaveRequest.findMany({
+      where: {
+        employeeId,
+      },
+      include: {
+        employee: {
+          select: {
+            fullName: true,
+            contactNumber: true,
+            email: true,
+            jobTitle: true,
+            profilePicture: true,
+          },
+        },
+      },
+    });
+
+    return {
+      success: Boolean(leaveRequest),
+      result: leaveRequest ?? 'Leave request not found!!!',
+    };
+  }
+
 
   async update(id: string, updateLeaveRequestDto: UpdateLeaveRequestDto) {
     const leaveRequest = await this.prisma.leaveRequest.update({

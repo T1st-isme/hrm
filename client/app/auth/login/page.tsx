@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -16,6 +16,7 @@ import { Loader2, UserCircle } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import Loading from "@/app/components/loading";
 
 export default function LoginPage() {
     const { loading, login, error, user } = useAuth();
@@ -31,27 +32,26 @@ export default function LoginPage() {
         }
         try {
             await login({ email, password });
-            if (!error) {
-                console.log("Login successful");
-                console.log(user?.email);
-                console.log(`Welcome ${user?.firstName} ${user?.lastName}`);
-                router.push("/");
-            }
         } catch (error) {
             console.error("An error occurred during login: " + error);
         }
     };
 
-    return (
-        loading ? (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="flex items-center justify-center">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </div>
-            </div>
-        ) : (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <Card className="w-full max-w-md">
+    useEffect(() => {
+        if (user) {
+            if (user.roles?.includes("admin")) {
+                router.push("/admin");
+            } else {
+                router.push("/");
+            }
+        }
+    }, [user, router]);
+
+    return loading ? (
+        <Loading />
+    ) : (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <Card className="w-full max-w-md">
                 <CardHeader className="space-y-1">
                     <div className="flex items-center justify-center mb-4">
                         <UserCircle className="h-12 w-12 text-primary" />
@@ -113,7 +113,6 @@ export default function LoginPage() {
                     </p>
                 </CardFooter>
             </Card>
-            </div>
-        )
+        </div>
     );
 }

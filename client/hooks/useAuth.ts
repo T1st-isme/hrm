@@ -1,3 +1,5 @@
+"use client";
+
 import { useAuthStore } from "@/state/useAuthStore";
 
 export const useAuth = () => {
@@ -7,6 +9,7 @@ export const useAuth = () => {
     const login = useAuthStore((state) => state.login);
     const logout = useAuthStore((state) => state.logout);
     const checkAuth = useAuthStore((state) => state.checkAuth);
+    const hasRole = useAuthStore((state) => state.hasRole);
 
-    return { user, loading, error, login, logout, checkAuth };
+    return { user, loading, error, login, logout, checkAuth, hasRole };
 };

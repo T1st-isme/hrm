@@ -88,9 +88,12 @@ export class AuthService {
       jobTitle: userValidate.jobTitle,
       department: userValidate.department.name,
       fullName: userValidate.fullName,
+      address: userValidate.address,
+      dateOfBirth: userValidate.dateOfBirth,
       contactNumber: userValidate.contactNumber,
       profilePicture: userValidate.profilePicture,
       roles: userValidate.employeeRoles.map((x) => x.role.name),
+      createdAt: userValidate.createdAt,
     };
 
     return {

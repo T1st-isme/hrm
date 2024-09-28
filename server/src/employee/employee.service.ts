@@ -10,51 +10,56 @@ export const roundsOfHashing = 10;
 
 @Injectable()
 export class EmployeeService {
-    constructor(private prisma: PrismaService, private cloudinaryService: CloudinaryService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
+  async create(
+    createEmployeeDto: CreateEmployeeDto,
+    profilePicture: Express.Multer.File,
+  ) {
+    const hashedPassword = await bcrypt.hash(
+      createEmployeeDto.password,
+      roundsOfHashing,
+    );
 
-
-    async create(createEmployeeDto: CreateEmployeeDto, profilePicture: Express.Multer.File) {
-        const hashedPassword = await bcrypt.hash(
-          createEmployeeDto.password,
-          roundsOfHashing,
-        );
-
-        let profilePictureUrl = createEmployeeDto.profilePicture;
-        if (profilePicture) {
-          const uploadResult = await this.cloudinaryService.uploadImage(profilePicture);
-          if ('secure_url' in uploadResult) {
-            profilePictureUrl = uploadResult.secure_url;
-          }
-        }
-
-        const employee = await this.prisma.employee.create({
-          data: {
-            ...createEmployeeDto,
-            fullName: `${createEmployeeDto.firstName} ${createEmployeeDto.lastName}`,
-            profilePicture: profilePictureUrl,
-            dateOfBirth: new Date(createEmployeeDto.dateOfBirth).toISOString(),
-            password: hashedPassword,
-          },
-        });
-
-        //gán user role cho nhân viên
-        const userRole = await this.prisma.role.findUnique({
-          where: { name: 'user' },
-        });
-        if (userRole) {
-          await this.prisma.employeeRole.create({
-            data: {
-              employeeId: employee.id,
-              roleId: userRole.id,
-            },
-          });
-        }
-        return {
-          success: Boolean(employee),
-          result: employee || 'Không tạo được nhân viên!!!',
-        };
+    let profilePictureUrl = createEmployeeDto.profilePicture;
+    if (profilePicture) {
+      const uploadResult =
+        await this.cloudinaryService.uploadImage(profilePicture);
+      if ('secure_url' in uploadResult) {
+        profilePictureUrl = uploadResult.secure_url;
       }
+    }
+
+    const employee = await this.prisma.employee.create({
+      data: {
+        ...createEmployeeDto,
+        fullName: `${createEmployeeDto.firstName} ${createEmployeeDto.lastName}`,
+        profilePicture: profilePictureUrl,
+        dateOfBirth: new Date(createEmployeeDto.dateOfBirth).toISOString(),
+        password: hashedPassword,
+      },
+    });
+
+    //gán user role cho nhân viên
+    const userRole = await this.prisma.role.findUnique({
+      where: { name: 'user' },
+    });
+    if (userRole) {
+      await this.prisma.employeeRole.create({
+        data: {
+          employeeId: employee.id,
+          roleId: userRole.id,
+        },
+      });
+    }
+    return {
+      success: Boolean(employee),
+      result: employee || 'Không tạo được nhân viên!!!',
+    };
+  }
 
   async findAll(query: any) {
     const page = parseInt(query.page, 10) || 1;
@@ -64,16 +69,16 @@ export class EmployeeService {
     if (page > totalPages) {
       return {
         success: false,
-        message: "Invalid page number",
+        message: 'Invalid page number',
       };
     }
 
     const apiFeatures = new APIFeatures({ where: {} }, query)
-        .search()
-        .filter()
-        .limit()
-        .sort()
-        .pagination(resPerPage);
+      .search()
+      .filter()
+      .limit()
+      .sort()
+      .pagination(resPerPage);
     const result = await this.prisma.employee.findMany({
       ...apiFeatures.query,
       include: {
@@ -85,7 +90,7 @@ export class EmployeeService {
         department: true,
       },
       skip: (page - 1) * resPerPage,
-      take: resPerPage
+      take: resPerPage,
     });
     const filteredEmployeesCount = result.length;
     return {
@@ -95,16 +100,11 @@ export class EmployeeService {
       currentPage: page,
       resPerPage,
       filteredEmployeesCount,
-      result
+      result,
     };
   }
 
-
   async findOne(id: string) {
-    if (!id) {
-      throw new Error('Employee ID must be provided');
-    }
-
     const employee = await this.prisma.employee.findUnique({
       where: {
         id,
@@ -135,36 +135,92 @@ export class EmployeeService {
     return employee;
   }
 
+  //   async update(id: string, updateEmployeeDto: UpdateEmployeeDto, profilePicture: Express.Multer.File) {
+  //     const hashedPassword = await bcrypt.hash(
+  //       updateEmployeeDto.password,
+  //       roundsOfHashing,
+  //     );
+
+  //     let profilePictureUrl = updateEmployeeDto.profilePicture;
+  //     if (profilePicture) {
+  //       const uploadResult = await this.cloudinaryService.uploadImage(profilePicture);
+  //       if ('secure_url' in uploadResult) {
+  //         profilePictureUrl = uploadResult.secure_url;
+  //       }
+  //     }
+
+  //     const employee = await this.prisma.employee.update({
+  //       where: {
+  //         id,
+  //       },
+  //       data: {
+  //         ...updateEmployeeDto,
+  //         profilePicture: profilePictureUrl,
+  //         dateOfBirth: new Date(updateEmployeeDto.dateOfBirth).toISOString(),
+  //         password: hashedPassword,
+  //       },
+  //     });
+  //     return {
+  //       success: Boolean(employee),
+  //       result: employee || 'Không tìm thấy nhân viên!!!',
+  //     };
+  //   }
+
   async update(id: string, updateEmployeeDto: UpdateEmployeeDto, profilePicture: Express.Multer.File) {
-    const hashedPassword = await bcrypt.hash(
-      updateEmployeeDto.password,
-      roundsOfHashing,
-    );
+    let hashedPassword = null;
+
+    // Check if password is provided
+    if (updateEmployeeDto.password) {
+        hashedPassword = await bcrypt.hash(updateEmployeeDto.password, roundsOfHashing);
+    }
 
     let profilePictureUrl = updateEmployeeDto.profilePicture;
+
+    // Check if a new profile picture is provided
     if (profilePicture) {
-      const uploadResult = await this.cloudinaryService.uploadImage(profilePicture);
-      if ('secure_url' in uploadResult) {
-        profilePictureUrl = uploadResult.secure_url;
-      }
+        const uploadResult = await this.cloudinaryService.uploadImage(profilePicture);
+        if ('secure_url' in uploadResult) {
+            profilePictureUrl = uploadResult.secure_url;
+        }
+    }
+
+    // Construct the update data object
+    const updateData: any = {
+        ...updateEmployeeDto,
+    };
+
+    // Add password if provided
+    if (hashedPassword) {
+        updateData.password = hashedPassword;
+    }
+
+    // Add profilePictureUrl if provided
+    if (profilePictureUrl) {
+        updateData.profilePicture = profilePictureUrl;
+    }
+
+    // Add dateOfBirth if provided and valid
+    if (updateEmployeeDto.dateOfBirth) {
+        try {
+            updateData.dateOfBirth = new Date(updateEmployeeDto.dateOfBirth).toISOString();
+        } catch (error) {
+            console.error("Invalid date format", error);
+            throw new Error("Invalid dateOfBirth format");
+        }
     }
 
     const employee = await this.prisma.employee.update({
-      where: {
-        id,
-      },
-      data: {
-        ...updateEmployeeDto,
-        profilePicture: profilePictureUrl,
-        dateOfBirth: new Date(updateEmployeeDto.dateOfBirth).toISOString(),
-        password: hashedPassword,
-      },
+        where: {
+            id,
+        },
+        data: updateData,
     });
+
     return {
-      success: Boolean(employee),
-      result: employee || 'Không tìm thấy nhân viên!!!',
+        success: Boolean(employee),
+        result: employee || 'Không tìm thấy nhân viên!!!',
     };
-  }
+}
 
   async remove(id: string) {
     const employee = await this.prisma.employee.delete({

@@ -1,13 +1,19 @@
 // src/services/employeeService.ts
 import axiosInstance from "./axiosConfig";
 
-// Function to fetch employees from NestJS API
-export const getEmployees = async () => {
-    const response = await axiosInstance.get("/employee");
+interface queryParams {
+    page: number;
+    limit: number;
+    sort: string;
+}
+
+export const getEmployees = async (queryParams: queryParams) => {
+    const response = await axiosInstance.get(
+        `/employee?page=${queryParams.page}&limit=${queryParams.limit}&sort=${queryParams.sort}`
+    );
     return response.data;
 };
 
-// Function to create a new employee in NestJS API
 export const createEmployee = async (formData: FormData) => {
     const response = await axiosInstance.post("/employee", formData, {
         headers: {

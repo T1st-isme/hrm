@@ -1,4 +1,3 @@
-// import Cookies from 'js-cookie';
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -28,5 +27,6 @@ const axiosInstance = axios.create({
 //         return Promise.reject(new Error(error.response.data.message));
 //     }
 // );
+
 
 export default axiosInstance;

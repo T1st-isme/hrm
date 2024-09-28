@@ -1,14 +1,14 @@
-import { approveLeaveRequest, createLeaveRequest, getLeaveRequest, rejectLeaveRequest } from "@/services/leaveRequest.service";
+import { approveLeaveRequest, createLeaveRequest, getLeaveRequest, getLeaveRequestById, rejectLeaveRequest } from "@/services/leaveRequest.service";
 import { create } from "zustand";
 
 interface LeaveRequest {
-    id: string;
+    id?: string;
     employeeId: string;
     startDate: string;
     endDate: string;
     reason: string;
-    status: string;
-    employee: Employee;
+    status?: string;
+    employee?: Employee;
 }
 
 interface Employee {
@@ -28,9 +28,11 @@ interface RequestStore {
     leaveRequests: LeaveRequest[];
     loading: boolean;
     error: string | null;
+    leaveRequest: LeaveRequest[] | null;
 
     getLeaveRequests: () => Promise<void>;
-    createLeaveRequest: (data: unknown) => Promise<void>;
+    createLeaveRequest: (leaveRequest: LeaveRequest) => Promise<void>;
+    getLeaveRequestById: (id: string) => Promise<void>;
     approveLeaveRequest: (id: string) => Promise<void>;
     rejectLeaveRequest: (id: string) => Promise<void>;
 }
@@ -39,6 +41,7 @@ export const useRequestStore = create<RequestStore>((set, get) => ({
     leaveRequests: [],
     loading: false,
     error: null,
+    leaveRequest: null,
 
     getLeaveRequests: async () => {
         set({ loading: true, error: null });
@@ -59,11 +62,29 @@ export const useRequestStore = create<RequestStore>((set, get) => ({
         }
     },
 
-    createLeaveRequest: async (data: unknown) => {
+    getLeaveRequestById: async (id: string) => {
         set({ loading: true, error: null });
         try {
-            const response = await createLeaveRequest(data);
-            set({ leaveRequests: [...get().leaveRequests, response.data], loading: false });
+            const response = await getLeaveRequestById(id);
+            if (response.success) {
+                set({ leaveRequest: response.result, loading: false });
+            } else {
+                set({ error: "Failed to get leave request: " + response.message, loading: false });
+            }
+        } catch (error) {
+            set({ error: "Failed to get leave request: " + error, loading: false });
+        }
+    },
+
+    createLeaveRequest: async (leaveRequest: LeaveRequest) => {
+        set({ loading: true, error: null });
+        try {
+            const response = await createLeaveRequest(leaveRequest);
+            if (response.success) {
+                set({ leaveRequests: [...get().leaveRequests, response.result], loading: false });
+            } else {
+                set({ error: "Failed to create leave request: " + response.message, loading: false });
+            }
         } catch (error) {
             set({ error: "Failed to create leave request: " + error, loading: false });
         }
@@ -85,7 +106,7 @@ export const useRequestStore = create<RequestStore>((set, get) => ({
             set({ error: "Failed to approve leave request: " + error, loading: false });
         }
     },
-    
+
     rejectLeaveRequest: async (id: string) => {
         set({ loading: true, error: null });
         try {

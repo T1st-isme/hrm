@@ -15,14 +15,17 @@ export default function MainLayout({
     const checkAuth = useAuthStore((state) => state.checkAuth);
 
     useEffect(() => {
+        console.log("Checking authentication...");
         checkAuth();
     }, [checkAuth]);
 
     return (
-        <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
             <SidebarComponent />
             <div className="flex flex-col flex-1">
-                <NavbarComponent title={title} />
+                <header className="h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6">
+                    <NavbarComponent title={title} />
+                </header>
                 <main className="p-4">{children}</main>
             </div>
         </div>

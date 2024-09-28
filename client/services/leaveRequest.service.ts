@@ -10,6 +10,11 @@ export const createLeaveRequest = async (data: unknown) => {
     return response.data;
 };
 
+export const getLeaveRequestById = async (id: string) => {
+    const response = await axiosInstance.get(`/leave-request/employee/${id}`);
+    return response.data;
+};
+
 export const approveLeaveRequest = async (id: string) => {
     const response = await axiosInstance.patch(`/leave-request/${id}/approve`);
     return response.data;
