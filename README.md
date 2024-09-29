@@ -87,10 +87,12 @@ cd server
 ## Configure the environment variables
 <p>You can use the .env.example file to create the .env file</p>
 
+In here I have a sample database in mongodb atlas, you can use it or create your own database.
+
 **Detail of .env file**
 
 ```bash
-DATABASE_URL=
+DATABASE_URL="mongodb+srv://admin:admin@hrm.dpupm.mongodb.net/hrm?retryWrites=true&w=majority"
 
 JWT_SECRET=
 
@@ -119,3 +121,20 @@ yarn start:dev
 ```
 
 </details>
+
+## Demo account
+
+**Admin**
+
+- Email: test@dev.com
+- Password: 123123123
+
+**User**
+
+- Email: t1st@dev.com
+- Password: 123123123
+
+## Contact
+
+- Email: trientrung102@gmail.com
+
