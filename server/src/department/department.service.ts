@@ -6,38 +6,58 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class DepartmentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createDepartmentDto: CreateDepartmentDto) {
-    return this.prisma.department.create({
+  async create(createDepartmentDto: CreateDepartmentDto) {
+    const department = await this.prisma.department.create({
       data: createDepartmentDto,
     });
+    return {
+      success: Boolean(department),
+      result: department || "Không tạo được phòng ban!!!",
+    };
   }
 
-  findAll() {
-    return this.prisma.department.findMany();
+  async findAll() {
+    const departments = await this.prisma.department.findMany();
+    return {
+      success: Boolean(departments),
+      result: departments || "Không tìm thấy phòng ban!!!",
+    };
   }
 
-  findOne(id: string) {
-    return this.prisma.department.findUnique({
+  async findOne(id: string) {
+    const department = await this.prisma.department.findUnique({
       where: {
         id,
       },
     });
+    return {
+      success: Boolean(department),
+      result: department || "Không tìm thấy phòng ban!!!",
+    };
   }
 
-  update(id: string, updateDepartmentDto: UpdateDepartmentDto) {
-    return this.prisma.department.update({
+  async update(id: string, updateDepartmentDto: UpdateDepartmentDto) {
+    const department = await this.prisma.department.update({
       where: {
         id,
       },
       data: updateDepartmentDto,
     });
+    return {
+      success: Boolean(department),
+      result: department || "Không tìm thấy phòng ban!!!",
+    };
   }
 
-  remove(id: string) {
-    return this.prisma.department.delete({
+  async remove(id: string) {
+    const department = await this.prisma.department.delete({
       where: {
         id,
       },
     });
+    return {
+      success: Boolean(department),
+      result: department || "Không tìm thấy phòng ban!!!",
+    };
   }
 }

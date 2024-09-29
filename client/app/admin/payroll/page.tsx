@@ -1,9 +1,11 @@
 import MainLayout from "../../components/MainLayout";
-
-export default function PayrollPage() {
+import withAuth from "../../components/withAuth";
+const PayrollPage = () => {
     return (
         <MainLayout title="Payroll">
             <div>Payroll</div>
         </MainLayout>
     );
-}
+};
+
+export default withAuth(PayrollPage, ["admin"]);
