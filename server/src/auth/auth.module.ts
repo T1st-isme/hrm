@@ -8,7 +8,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { JwtStrategy } from './jwt.strategy';
 import { EmployeeModule } from 'src/employee/employee.module';
 
-export const jwtSecret = 'zjP9h6ZI5LoSKCRj';
+export const jwtSecret = process.env.JWT_SECRET;
 
 @Module({
   imports: [
