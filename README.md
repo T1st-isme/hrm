@@ -87,20 +87,21 @@ cd server
 ## Configure the environment variables
 <p>You can use the .env.example file to create the .env file</p>
 
-In here I have a sample database in mongodb atlas, you can use it or create your own database.
+In here I have a sample database in mongodb atlas, cloudinary, and jwt secret, you can use it or create your own.
 
 **Detail of .env file**
 
 ```bash
 DATABASE_URL="mongodb+srv://admin:admin@hrm.dpupm.mongodb.net/hrm?retryWrites=true&w=majority"
 
-JWT_SECRET=
+JWT_SECRET="valorantistrash"
 
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+CLOUDINARY_CLOUD_NAME="dzyf7iccb"
+CLOUDINARY_API_KEY="861486826217416"
+CLOUDINARY_API_SECRET="Xv9ndXZSjG7J4TWS1wLvx62Iq2w"
 
-COOKIE_EXPIRES_TIME=
+COOKIE_EXPIRES_TIME=30
+
 ```
 
 
@@ -137,4 +138,3 @@ yarn start:dev
 ## Contact
 
 - Email: trientrung102@gmail.com
-
