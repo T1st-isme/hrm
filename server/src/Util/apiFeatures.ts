@@ -36,7 +36,7 @@ class APIFeatures {
     this.query = { ...this.query, take: limit };
     return this;
   }
-  
+
   filter() {
     const queryCopy = { ...this.queryStr };
 
