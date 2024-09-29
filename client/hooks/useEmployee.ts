@@ -13,11 +13,13 @@ export const useEmployee = () => {
   const employee = useEmployeeStore((state) => state.employee);
   const error = useEmployeeStore((state) => state.error);
   const totalPages = useEmployeeStore((state) => state.totalPages);
+  const employeeCount = useEmployeeStore((state) => state.employeeCount);
   const isDialogOpen = useEmployeeStore((state) => state.isDialogOpen);
   const openDialog = useEmployeeStore((state) => state.openDialog);
   const closeDialog = useEmployeeStore((state) => state.closeDialog);
   return {
     employees,
+    employeeCount,
     fetchEmployees,
     addEmployee,
     getEmployeeById,

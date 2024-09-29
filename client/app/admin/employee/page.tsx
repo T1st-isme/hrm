@@ -103,6 +103,11 @@ const EmployeePage = () => {
         if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
     };
 
+    const breadcrumbs = [
+        { label: "Home", href: "/admin" },
+        { label: "Employee" },
+    ];
+
     if (error)
         return (
             <MainLayout title="">
@@ -111,11 +116,11 @@ const EmployeePage = () => {
         );
 
     return (
-        <MainLayout title="Employee">
+        <MainLayout title="Employee" breadcrumbs={breadcrumbs}>
             {loading ? (
                 <Loading />
             ) : (
-                <div className="container mx-auto py-10">
+                <div className="container mx-auto">
                     <h1 className="text-2xl font-bold mb-4">Employee List</h1>
                     <div className="flex justify-between items-center mb-4">
                         <Input

@@ -7,6 +7,7 @@ export const useDepartment = () => {
   const fetchDepartments = useDepartmentStore((state) => state.fetchDepartments);
   const getDepartmentById = useDepartmentStore((state) => state.getDepartmentById);
   const addDepartment = useDepartmentStore((state) => state.addDepartment);
+  const deleteDepartment = useDepartmentStore((state) => state.deleteDepartment);
   const updateDepartment = useDepartmentStore((state) => state.updateDepartment);
   const loading = useDepartmentStore((state) => state.loading);
   const error = useDepartmentStore((state) => state.error);
@@ -21,6 +22,7 @@ export const useDepartment = () => {
     getDepartmentById,
     addDepartment,
     updateDepartment,
+    deleteDepartment,
     loading,
     error,
     isDialogOpen,

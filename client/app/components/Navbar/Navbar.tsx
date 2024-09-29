@@ -85,7 +85,8 @@ export default function NavbarComponent({ title }: { title: string }) {
                                                     alt="User Avatar"
                                                 />
                                                 <AvatarFallback>
-                                                    AD
+                                                    {user?.firstName?.charAt(0)}
+                                                    {user?.lastName?.charAt(0)}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">

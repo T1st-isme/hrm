@@ -27,6 +27,7 @@ interface Employee {
     departmentId: string;
     employmentStartDate?: string;
     salary?: number | null;
+    status?: string;
     createdAt?: string;
     updatedAt?: string;
     department?: Department;
@@ -45,6 +46,7 @@ interface EmployeeStore {
     isDialogOpen: boolean;
     employee: Employee | null;
     totalPages: number;
+    employeeCount: number;
 
     fetchEmployees: (queryParams: queryParams) => Promise<void>;
     addEmployee: (
@@ -69,7 +71,7 @@ export const useEmployeeStore = create<EmployeeStore>((set, get) => ({
     isDialogOpen: false,
     employee: null,
     totalPages: 1,
-
+    employeeCount: 0,
     getEmployeeById: async (id: string) => {
         set((state) => {
             if (state.employee && state.employee.id === id) {
@@ -95,7 +97,7 @@ export const useEmployeeStore = create<EmployeeStore>((set, get) => ({
     },
 
     fetchEmployees: async (queryParams: queryParams) => {
-        set({ loading: true, error: null });
+        set({ loading: true, error: null});
         try {
             const res = await getEmployees(queryParams);
             if (res.success) {
@@ -103,10 +105,11 @@ export const useEmployeeStore = create<EmployeeStore>((set, get) => ({
                     set({
                         employees: res.result,
                         totalPages: res.totalPages,
+                        employeeCount: res.employeesCount,
                         loading: false,
                     });
                 } else {
-                    set({ employees: [], loading: false });
+                    set({ employees: [], loading: false, employeeCount: 0 });
                 }
             }
         } catch (error) {

@@ -79,8 +79,14 @@ export default function EditProfile() {
             : URL.createObjectURL(avatar)
         : "/placeholder.svg?height=96&width=96";
 
+    const breadcrumbs = [
+        { label: "Home", href: "/" },
+        { label: "Profile", href: "/profile" },
+        { label: "Edit" },
+    ];
+
     return (
-        <MainLayout title="Edit Profile">
+        <MainLayout title="Edit Profile" breadcrumbs={breadcrumbs}>
             {loading ? (
                 <Loading />
             ) : (

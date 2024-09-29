@@ -1,6 +1,13 @@
 "use client";
 
-import { Filter, Loader2, MoreHorizontal, Plus } from "lucide-react";
+import {
+    Filter,
+    Loader2,
+    MoreHorizontal,
+    Pencil,
+    Plus,
+    Trash2,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +33,7 @@ const DepartmentPage = () => {
         isDialogOpen,
         openDialog,
         closeDialog,
+        deleteDepartment,
     } = useDepartment();
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
     const [editDepartmentId, setEditDepartmentId] = useState<string>("");
@@ -46,6 +54,14 @@ const DepartmentPage = () => {
             }
         },
         [openDialog]
+    );
+    const handleDelete = useCallback(
+        (id: string | undefined) => {
+            if (id) {
+                deleteDepartment(id);
+            }
+        },
+        [deleteDepartment]
     );
 
     const handleCloseEditModal = useCallback(() => {
@@ -106,9 +122,17 @@ const DepartmentPage = () => {
                                                         )
                                                     }
                                                 >
+                                                    <Pencil className="mr-2 h-4 w-4" />
                                                     Edit
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        handleDelete(
+                                                            department.id
+                                                        )
+                                                    }
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4" />
                                                     Delete
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>

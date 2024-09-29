@@ -68,6 +68,46 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
             return next(params);
         });
 
+          // Soft delete middleware
+        //   this.$use(async (params, next) => {
+        //     // Intercept the delete and deleteMany actions
+        //     if (params.action === 'delete') {
+        //         // Convert delete action to an update that sets deletedAt
+        //         params.action = 'update';
+        //         params.args.data = { deletedAt: new Date() };
+        //     }
+
+        //     if (params.action === 'deleteMany') {
+        //         // Convert deleteMany action to an updateMany that sets deletedAt
+        //         params.action = 'updateMany';
+        //         if (params.args.data) {
+        //             params.args.data.deletedAt = new Date();
+        //         } else {
+        //             params.args.data = { deletedAt: new Date() };
+        //         }
+        //     }
+
+        //     // Intercept find actions to exclude soft-deleted records by default
+        //     if (params.action === 'findUnique' || params.action === 'findFirst') {
+        //         params.action = 'findFirst';
+        //         params.args.where = {
+        //             ...params.args.where,
+        //             deletedAt: null,
+        //         };
+        //     }
+
+        //     if (params.action === 'findMany') {
+        //         if (!params.args.where) {
+        //             params.args.where = { deletedAt: null };
+        //         } else if (params.args.where.deletedAt === undefined) {
+        //             params.args.where.deletedAt = null;
+        //         }
+        //     }
+
+        //     return next(params);
+        // });
+
+
         await this.$connect();
     }
 

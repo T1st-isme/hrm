@@ -12,13 +12,14 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 
 const Dashboard = () => {
     const { user } = useAuth();
     return (
         <MainLayout title="User Dashboard">
             <div className="flex flex-col min-h-screen bg-background">
-                <main className="flex-1 py-6 px-4 lg:px-8">
+                <main className="flex-1 px-4 lg:px-8">
                     <div className="max-w-8xl mx-auto space-y-6">
                         <div className="space-y-2">
                             <h1 className="text-3xl font-bold">
@@ -51,8 +52,11 @@ const Dashboard = () => {
                                     <Button
                                         className="w-full"
                                         variant="outline"
+                                        asChild
                                     >
-                                        Request Leave
+                                        <Link href="/request">
+                                            Request Leave
+                                        </Link>
                                     </Button>
                                 </CardContent>
                             </Card>

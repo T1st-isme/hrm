@@ -26,8 +26,40 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useEmployee } from "@/hooks/useEmployee";
+import { useEffect } from "react";
+import { useDepartment } from "@/hooks/useDepartment";
+import { useRequest } from "@/hooks/useRequest";
 
 function AdminPage() {
+    const { fetchEmployees, employeeCount, employees } = useEmployee();
+    const { fetchDepartments, departments } = useDepartment();
+    const { getLeaveRequests, leaveRequests } = useRequest();
+    useEffect(() => {
+        const fetchAndSetEmployees = async () => {
+            await fetchEmployees({
+                page: 1,
+                limit: 10,
+                sort: "fullName",
+            });
+        };
+        fetchAndSetEmployees();
+    }, [fetchEmployees]);
+
+    useEffect(() => {
+        const fetchAndSetDepartments = async () => {
+            await fetchDepartments();
+        };
+        fetchAndSetDepartments();
+    }, [fetchDepartments]);
+
+    useEffect(() => {
+        const fetchAndSetLeaveRequests = async () => {
+            await getLeaveRequests();
+        };
+        fetchAndSetLeaveRequests();
+    }, [getLeaveRequests]);
+
     return (
         <MainLayout title="Admin Dashboard">
             <div className="flex flex-col min-h-screen bg-background">
@@ -49,7 +81,7 @@ function AdminPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">
-                                        1,234
+                                        {employeeCount}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
                                         +5% from last month
@@ -64,7 +96,9 @@ function AdminPage() {
                                     <Building className="w-4 h-4 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">12</div>
+                                    <div className="text-2xl font-bold">
+                                        {departments?.length}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">
                                         2 new this quarter
                                     </p>
@@ -92,7 +126,9 @@ function AdminPage() {
                                     <Bell className="w-4 h-4 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">18</div>
+                                    <div className="text-2xl font-bold">
+                                        {leaveRequests?.length}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">
                                         5 new since yesterday
                                     </p>
@@ -203,21 +239,13 @@ function AdminPage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem>
-                                                All Departments
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                Engineering
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                Sales
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                Marketing
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                Human Resources
-                                            </DropdownMenuItem>
+                                            {departments?.map((department) => (
+                                                <DropdownMenuItem
+                                                    key={department.id}
+                                                >
+                                                    {department.name}
+                                                </DropdownMenuItem>
+                                            ))}
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>
@@ -231,45 +259,27 @@ function AdminPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        <TableRow>
-                                            <TableCell>John Doe</TableCell>
-                                            <TableCell>Engineering</TableCell>
-                                            <TableCell>Active</TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                >
-                                                    View
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>Jane Smith</TableCell>
-                                            <TableCell>Sales</TableCell>
-                                            <TableCell>Active</TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                >
-                                                    View
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>Bob Johnson</TableCell>
-                                            <TableCell>Marketing</TableCell>
-                                            <TableCell>On Leave</TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                >
-                                                    View
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
+                                        {employees?.map((employee) => (
+                                            <TableRow key={employee.id}>
+                                                <TableCell>
+                                                    {employee.fullName}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {employee.department?.name}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {employee.status}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                    >
+                                                        View
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
                                     </TableBody>
                                 </Table>
                             </CardContent>

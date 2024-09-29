@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Mail, MapPin, Phone, User } from "lucide-react";
+import { Calendar, Mail, MapPin, Phone } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,8 +30,13 @@ export default function EmployeeProfile() {
         });
     };
 
+    const breadcrumbs = [
+        { label: "Home", href: "/" },
+        { label: "Profile" },
+    ];
+
     return (
-        <MainLayout title="Profile">
+        <MainLayout title="Profile" breadcrumbs={breadcrumbs}>
             <div className="flex flex-col min-h-screen bg-background">
                 <main className="flex-1 py-6 px-4 lg:px-8">
                     <div className="max-w-8xl mx-auto space-y-6">
